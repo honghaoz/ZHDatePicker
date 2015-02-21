@@ -1,8 +1,8 @@
 # ZHDatePicker
-Customizable 'UIDatePicker'
+ZHDatePicker is a customizable 'UIDatePicker'.
 
 # Why?
-Apple's UIDatePicker is not custimizable, e.g. you can not use UIDatePicker on a view with a dark background color.
+Apple's UIDatePicker is not custimizable, e.g. you can not use an UIDatePicker on a view with a dark background color.
 
 # Preview
 ![preview](https://raw.githubusercontent.com/honghaoz/ZHDatePicker/master/Demo/preview.png)
