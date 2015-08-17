@@ -11,8 +11,6 @@ import UIKit
 class ViewController: UIViewController {
 
     var datePicker: ZHDatePicker!
-    var metricDict = [String: CGFloat]()
-    var viewDict = [String: UIView]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,12 +19,17 @@ class ViewController: UIViewController {
         
         // Setup View
         datePicker = ZHDatePicker()
-        viewDict["datePicker"] = datePicker
+        let views = ["datePicker": datePicker]
+		let metrics = ["fixedHeight": ZHDatePicker.kPickerFixedHeight]
+		
         datePicker.setTranslatesAutoresizingMaskIntoConstraints(false)
         self.view.addSubview(datePicker)
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[datePicker]|", options: NSLayoutFormatOptions(0), metrics: nil, views: viewDict))
-        metricDict["fixedHeight"] = ZHDatePicker.pickerFixedHeight
-        self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-100-[datePicker(fixedHeight)]", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: metricDict, views: viewDict))
+		
+		var constraints = [NSLayoutConstraint]()
+		constraints += NSLayoutConstraint.constraintsWithVisualFormat("H:|[datePicker]|", options: NSLayoutFormatOptions(0), metrics: nil, views: views) as! [NSLayoutConstraint]
+		
+		constraints += NSLayoutConstraint.constraintsWithVisualFormat("V:|-100-[datePicker(fixedHeight)]", options: NSLayoutFormatOptions.AlignAllCenterX, metrics: metrics, views: views) as! [NSLayoutConstraint]
+		NSLayoutConstraint.activateConstraints(constraints)
     }
 }
 

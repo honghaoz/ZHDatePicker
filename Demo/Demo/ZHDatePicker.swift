@@ -15,7 +15,7 @@ import UIKit
 class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
     
     // MARK:- View Related
-    class var pickerFixedHeight: CGFloat { return 216.0 }
+    class var kPickerFixedHeight: CGFloat { return 216.0 }
     private let rowHeight: CGFloat = 34
     
     // 18000 is divisible with 12, 24 (for the hour) and 60 (for the minutes and seconds)
@@ -62,59 +62,62 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     // Font
-    var font: UIFont! = UIFont(name: "HelveticaNeue-Light", size: 25.0)!
+    var font: UIFont! = UIFont.systemFontOfSize(20) //UIFont(name: "HelveticaNeue-Light", size: 20.0)!
     var textColor: UIColor = UIColor(white: 1.0, alpha: 0.95)
-    
-    
-    
     
     
     // MARK: - NSDate Related
     
     /// initialDate is a helper for calculating text showing on picker
-    private var initialDate: NSDate!
+    var initialDate: NSDate!
     
     /// NSDate showing on picker
     var date: NSDate {
-        // Here we are parsing text from picker to a NSDate
-        let tempDateFormatter = NSDateFormatter()
-        tempDateFormatter.dateFormat = formatStringYear
-        // Init string with year
-        var dateString: String = tempDateFormatter.stringFromDate(fakeDate)
-        
-        // Perpare to parse other parts
-        if isDateAfterWeekday {
-            tempDateFormatter.dateFormat = formatStringYear + " " + formatStringHour + " " +
-                (formatStringWeekday + " " + formatStringMonth + " " + formatStringDay)
-                + " " + formatStringMinute
-        } else {
-            tempDateFormatter.dateFormat = formatStringYear + " " + formatStringHour + " " +
-                (formatStringMonth + " " + formatStringDay + " " + formatStringWeekday)
-                + " " + formatStringMinute
-        }
-        
-        if is24HourFormat {
-            dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
-            dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
-            dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
-        } else {
-            tempDateFormatter.dateFormat = tempDateFormatter.dateFormat + " " + formatStringAMPM
+        get {
+            // Here we are parsing text from picker to a NSDate
+            let tempDateFormatter = NSDateFormatter()
+            tempDateFormatter.dateFormat = formatStringYear
+            // Init string with year
+            var dateString: String = tempDateFormatter.stringFromDate(fakeDate)
             
-            if isAmpmAfterTime {
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(3), inComponent: 3), inComponent: 3)
+            // Perpare to parse other parts
+            if isDateAfterWeekday {
+                tempDateFormatter.dateFormat = formatStringYear + " " + formatStringHour + " " +
+                    (formatStringWeekday + " " + formatStringMonth + " " + formatStringDay)
+                    + " " + formatStringMinute
             } else {
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(3), inComponent: 3), inComponent: 3)
-                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
+                tempDateFormatter.dateFormat = formatStringYear + " " + formatStringHour + " " +
+                    (formatStringMonth + " " + formatStringDay + " " + formatStringWeekday)
+                    + " " + formatStringMinute
             }
+            
+            if is24HourFormat {
+                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
+                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
+                dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
+            } else {
+                tempDateFormatter.dateFormat = tempDateFormatter.dateFormat + " " + formatStringAMPM
+                
+                if isAmpmAfterTime {
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(3), inComponent: 3), inComponent: 3)
+                } else {
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(2), inComponent: 2), inComponent: 2)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(0), inComponent: 0), inComponent: 0)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(3), inComponent: 3), inComponent: 3)
+                    dateString += " " + getTextForRow(getRealRowFromRawRow(self.selectedRowInComponent(1), inComponent: 1), inComponent: 1)
+                }
+            }
+            
+            tempDateFormatter.timeZone = timeZone
+            return tempDateFormatter.dateFromString(dateString)!
         }
         
-        tempDateFormatter.timeZone = timeZone
-        return tempDateFormatter.dateFromString(dateString)!
+        set {
+            self.gotoDate(newValue)
+        }
     }
     
     /// fakeDate may affects by daylight saving time, may not true date showing on picker
@@ -179,22 +182,82 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
     // MARK:- Other variables
     weak var pickerDelegate: ZHDatePickerDelegate?
     
-    
-    
-    
     // MARK:- Init Methods
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.setup()
     }
     
-    override init() {
-        super.init()
-    }
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setup()
+    }
+    
+    class func datePickerWithMonthSelectionStyle() -> ZHDatePicker {
+        let datePicker = self()
+        
+        // Add Styles
+        datePicker.layer.borderColor = UIColor(white: 1.0, alpha: 0.5).CGColor
+        datePicker.layer.borderWidth = 1.0
+        datePicker.layer.cornerRadius = 4.0
+        
+        // Add Header Month Selection
+        var views = [String: UIView]()
+        
+        let headerContainerView = UIView()
+        headerContainerView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        datePicker.addSubview(headerContainerView)
+        views["headerContainerView"] = headerContainerView
+        
+        headerContainerView.userInteractionEnabled = true
+        
+        datePicker.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[headerContainerView]|", options: NSLayoutFormatOptions(0), metrics: nil, views: views))
+        datePicker.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[headerContainerView(40)]", options: NSLayoutFormatOptions(0), metrics: nil, views: views))
+        
+        let monthIndicatorLabel = UILabel()
+        monthIndicatorLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        headerContainerView.addSubview(monthIndicatorLabel)
+        
+        monthIndicatorLabel.text = "April 21"//
+        monthIndicatorLabel.textColor = UIColor.whiteColor()
+        monthIndicatorLabel.font = UIFont.systemFontOfSize(20)
+        monthIndicatorLabel.textAlignment = NSTextAlignment.Center
+        
+        monthIndicatorLabel.setContentCompressionResistancePriority(1000, forAxis: UILayoutConstraintAxis.Horizontal)
+        monthIndicatorLabel.setContentCompressionResistancePriority(1000, forAxis: UILayoutConstraintAxis.Vertical)
+        monthIndicatorLabel.setContentHuggingPriority(1000, forAxis: UILayoutConstraintAxis.Horizontal)
+        monthIndicatorLabel.setContentHuggingPriority(1000, forAxis: UILayoutConstraintAxis.Vertical)
+        headerContainerView.addConstraint(NSLayoutConstraint(item: monthIndicatorLabel, attribute: NSLayoutAttribute.CenterX, relatedBy: NSLayoutRelation.Equal, toItem: headerContainerView, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0.0))
+        headerContainerView.addConstraint(NSLayoutConstraint(item: monthIndicatorLabel, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: headerContainerView, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0.0))
+        
+        //
+        let backwardButton = UIButton.buttonWithType(UIButtonType.Custom) as! UIButton
+        backwardButton.setTranslatesAutoresizingMaskIntoConstraints(false)
+        views["backwardButton"] = backwardButton
+        headerContainerView.addSubview(backwardButton)
+        
+        backwardButton.titleLabel!.font = UIFont.boldSystemFontOfSize(18)
+        backwardButton.setTitle("<", forState: .Normal)
+        backwardButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        backwardButton.setTitleColor(UIColor(white: 1.0, alpha: 0.3), forState: UIControlState.Highlighted)
+        backwardButton.addTarget(self, action: "backwardMonthButtonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+        headerContainerView.addConstraint(NSLayoutConstraint(item: backwardButton, attribute: NSLayoutAttribute.Leading, relatedBy: NSLayoutRelation.Equal, toItem: headerContainerView, attribute: NSLayoutAttribute.Leading, multiplier: 1.0, constant: 10))
+        headerContainerView.addConstraint(NSLayoutConstraint(item: headerContainerView, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: backwardButton, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0.0))
+        
+        let forwardButton = UIButton.buttonWithType(UIButtonType.Custom) as! UIButton
+        forwardButton.setTranslatesAutoresizingMaskIntoConstraints(false)
+        views["forwardButton"] = forwardButton
+        headerContainerView.addSubview(forwardButton)
+        
+        forwardButton.titleLabel!.font = UIFont.boldSystemFontOfSize(18)
+        forwardButton.setTitle(">", forState: .Normal)
+        forwardButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        forwardButton.setTitleColor(UIColor(white: 1.0, alpha: 0.3), forState: UIControlState.Highlighted)
+        forwardButton.addTarget(self, action: "forwardMonthButtonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+        headerContainerView.addConstraint(NSLayoutConstraint(item: forwardButton, attribute: NSLayoutAttribute.Trailing, relatedBy: NSLayoutRelation.Equal, toItem: headerContainerView, attribute: NSLayoutAttribute.Trailing, multiplier: 1.0, constant: -10))
+        headerContainerView.addConstraint(NSLayoutConstraint(item: headerContainerView, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: forwardButton, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0.0))
+        
+        return datePicker
     }
     
     private func setup() {
@@ -203,7 +266,12 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
         
         self.dataSource = self
         self.delegate = self
-        self.gotoCurrentDate()
+        
+        if initialDate == nil {
+            self.gotoCurrentDate()
+        } else {
+            self.gotoDate(initialDate)
+        }
     }
     
     /**
@@ -222,7 +290,7 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
         }
         
         // Add two white cover lines
-        let spacing = (ZHDatePicker.pickerFixedHeight - rowHeight) / 2.0 - 1.5
+        let spacing = (ZHDatePicker.kPickerFixedHeight - rowHeight) / 2.0 - 1.5
         
         let topSeparatorLine = createSeparatorLineView()
         self.addConstraint(NSLayoutConstraint(item: topSeparatorLine, attribute: NSLayoutAttribute.Top, relatedBy: NSLayoutRelation.Equal, toItem: self, attribute: NSLayoutAttribute.Top, multiplier: 1.0, constant: spacing))
@@ -241,6 +309,35 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
         for i in 0 ..< _numberOfComponents {
             self.selectRow(getStartRow(i), inComponent: i, animated: false)
         }
+    }
+    
+    func gotoDate(date: NSDate) {
+        self.initialDate = date
+        for i in 0 ..< _numberOfComponents {
+            self.selectRow(getStartRow(i), inComponent: i, animated: false)
+        }
+    }
+    
+    func gotoDateWithMonthOffset(offset: Int) {
+        let currentShowingDate = date
+        let calendar = NSCalendar.currentCalendar()
+        var components = calendar.components(NSCalendarUnit.CalendarUnitYear |  NSCalendarUnit.CalendarUnitMonth | NSCalendarUnit.CalendarUnitDay, fromDate: currentShowingDate)
+        components.month += offset
+        let resultDate = calendar.dateFromComponents(components)
+        
+        let interval = resultDate?.timeIntervalSinceDate(currentShowingDate)
+        let days: Int = Int(interval!) / (60 * 60 * 24) + (interval > 0 ? 1 : 0)
+        self.selectRow(selectedRowInComponent(0) + days, inComponent: 0, animated: true)
+        self.pickerDelegate?.datePickerValueDidChanged?(self)
+    }
+    
+    // MARK: Actions
+    func backwardMonthButtonTapped(sender: AnyObject) {
+        gotoDateWithMonthOffset(-1)
+    }
+    
+    func forwardMonthButtonTapped(sender: AnyObject) {
+        gotoDateWithMonthOffset(1)
     }
     
     // MARK: - UIPickerView Data Source
@@ -381,7 +478,7 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
                 if rowOffset < -1 || rowOffset > 0 {
                     assert(false, "Wrong row offset")
                 } else {
-                     timeOffset = NSTimeInterval(rowOffset) * baseTimeInterval
+                    timeOffset = NSTimeInterval(rowOffset) * baseTimeInterval
                 }
             }
         default:
@@ -413,7 +510,7 @@ class ZHDatePicker: UIPickerView, UIPickerViewDataSource, UIPickerViewDelegate {
         }
         return dateFormatter.stringFromDate(targetDate)
     }
-
+    
     /**
     Get real row from raw row
     
